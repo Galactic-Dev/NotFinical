@@ -1,6 +1,4 @@
-#import "MediaRemote.h"
-
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#import <MediaRemote/MediaRemote.h>
 
 @interface SBDisplayItem: NSObject
 @property (nonatomic,copy,readonly) NSString * bundleIdentifier;
@@ -20,9 +18,6 @@
 + (id)sharedInstance;
 -(id)recentAppLayouts;
 -(id)appLayouts;
--(void)_rebuildAppListCache;
--(void)_destroyAppListCache;
--(void)_removeCardForDisplayIdentifier:(id)arg1 ;
 -(void)_deleteAppLayout:(id)arg1 forReason:(long long)arg2;
 -(void)_quitAppsRepresentedByAppLayout:(id)arg1 forReason:(long long)arg2;
 @end
@@ -33,9 +28,7 @@
 
 @interface SBRecentAppLayouts: NSObject
 + (id)sharedInstance;
--(id)_recentsFromPrefs;
 -(void)remove:(SBAppLayout* )arg1;
--(void)removeAppLayouts:(id)arg1 ;
 @end
 
 // iOS 13
@@ -79,6 +72,39 @@ BOOL dismissAutomatically;
 int dismissDuration;
 int timeInterval;
 
+
+%hook NotificationAdjunctListViewController
+%new
+-(void)isPlayingChanged {
+		MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_get_main_queue(), ^(Boolean isPlaying){
+			isMusicPlaying = isPlaying;
+			if(dismissAutomatically){
+				int timerTime;
+				switch (timeInterval) {
+				case 0:
+					timerTime = dismissDuration;
+					break;
+				case 1:
+					timerTime = dismissDuration * 60;
+					break;
+				case 2:
+					timerTime = dismissDuration * 60 * 60;
+					break;
+				}
+				[NSTimer scheduledTimerWithTimeInterval:(CGFloat)timerTime target:self selector:@selector(dismissMediaControls:) userInfo:nil repeats:NO];
+			}
+		});
+}
+%end
+
+// Makes it easier to dismiss when using Sylph. Sylph disables userInteraction on this view by default.
+%hook MediaControlsHeaderView
+-(void)setFrame:(CGRect)arg1 {
+	%orig;
+	self.userInteractionEnabled = YES;
+}
+%end
+
 %group iOS13
 	%hook CSNotificationAdjunctListViewController
 	-(id)init {
@@ -107,27 +133,6 @@ int timeInterval;
 
 			}
 		}
-	}
-	%new
-	-(void)isPlayingChanged {
-		MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_get_main_queue(), ^(Boolean isPlaying){
-			isMusicPlaying = isPlaying;
-			if(dismissAutomatically){
-				int timerTime;
-				switch (timeInterval) {
-				case 0:
-					timerTime = dismissDuration;
-					break;
-				case 1:
-					timerTime = dismissDuration * 60;
-					break;
-				case 2:
-					timerTime = dismissDuration * 60 * 60;
-					break;
-				}
-				[NSTimer scheduledTimerWithTimeInterval:(CGFloat)timerTime target:self selector:@selector(dismissMediaControls:) userInfo:nil repeats:NO];
-			}
-		});
 	}
 	%end
 
@@ -169,14 +174,6 @@ int timeInterval;
 		[adjunctListViewController dismissMediaControls:nil];
 	}
 	%end
-
-	// Makes it easier to dismiss when using Sylph. Sylph disables userInteraction on this view by default.
-	%hook MediaControlsHeaderView
-	-(void)setFrame:(CGRect)arg1 {
-		%orig;
-		self.userInteractionEnabled = YES;
-	}
-	%end
 %end
 
 %group iOS12
@@ -208,27 +205,6 @@ int timeInterval;
 
 			}
 		}
-	}
-	%new
-	-(void)isPlayingChanged {
-		MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_get_main_queue(), ^(Boolean isPlaying){
-			isMusicPlaying = isPlaying;
-			if(dismissAutomatically){
-				int timerTime;
-				switch (timeInterval) {
-				case 0:
-					timerTime = dismissDuration;
-					break;
-				case 1:
-					timerTime = dismissDuration * 60;
-					break;
-				case 2:
-					timerTime = dismissDuration * 60 * 60;
-					break;
-				}
-				[NSTimer scheduledTimerWithTimeInterval:(CGFloat)timerTime target:self selector:@selector(dismissMediaControls:) userInfo:nil repeats:NO];
-			}
-		});
 	}
 	%end
 
@@ -271,13 +247,6 @@ int timeInterval;
 	}
 	%end
 
-	// Makes it easier to dismiss when using Sylph. Sylph disables userInteraction on this view by default.
-	%hook MediaControlsHeaderView
-	-(void)setFrame:(CGRect)arg1 {
-		%orig;
-		self.userInteractionEnabled = YES;
-	}
-	%end
 %end
 
 static void loadPrefs(){
@@ -294,10 +263,14 @@ static void loadPrefs(){
 %ctor {
 	loadPrefs();
 	if(isEnabled){
-		if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"13.0")) {
+		Class NotificationAdjunctListViewControllerClass;
+		if (@available(iOS 13.0, *)) {
 			%init(iOS13);
+			NotificationAdjunctListViewControllerClass = %c(CSNotificationAdjunctListViewController);
 		} else {
 			%init(iOS12);
+			NotificationAdjunctListViewControllerClass = %c(SBDashBoardNotificationAdjunctListViewController);
 		}
+		%init(NotificationAdjunctListViewController = NotificationAdjunctListViewControllerClass)
 	}
 }
