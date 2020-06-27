@@ -1,0 +1,10 @@
+Package: com.galacticdev.notfinical
+Name: NotFinical
+Depends: mobilesubstrate
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: Galactic Dev
+Author: Galactic Dev
+Section: Tweaks
+Version: 0.0.1
+Installed-Size: 248
