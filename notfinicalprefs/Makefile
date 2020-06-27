@@ -5,7 +5,6 @@ BUNDLE_NAME = NotFinicalPrefs
 
 NotFinicalPrefs_FILES = NFNRootListController.m
 NotFinicalPrefs_INSTALL_PATH = /Library/PreferenceBundles
-NotFinicalPrefs_FRAMEWORKS = UIKit
 NotFinicalPrefs_PRIVATE_FRAMEWORKS = Preferences
 NotFinicalPrefs_CFLAGS = -fobjc-arc
 
