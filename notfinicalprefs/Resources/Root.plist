@@ -146,6 +146,12 @@
 			<key>footerText</key>
 			<string>Credits to Dave van Wijk. I used some of his code from QuitAll to kill the now playing application.</string>
 		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Credits to @iCrazeiOS for updating to tweak with iOS 12 support.</string>
+		</dict>
 	</array>
 	<key>title</key>
 	<string>NotFinical</string>
