@@ -110,7 +110,7 @@
 			<key>isSegmented</key>
 			<true/>
 			<key>segmentCount</key>
-			<integer>59</integer>
+			<integer>60</integer>
 			<key>default</key>
 			<integer>30</integer>
 			<key>defaults</key>

@@ -1,3 +1,5 @@
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 #import "MediaRemote.h"
 
 #define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
@@ -25,6 +27,7 @@
 -(void)_removeCardForDisplayIdentifier:(id)arg1 ;
 -(void)_deleteAppLayout:(id)arg1 forReason:(long long)arg2;
 -(void)_quitAppsRepresentedByAppLayout:(id)arg1 forReason:(long long)arg2;
+-(void)_deleteAppLayoutsMatchingBundleIdentifier:(NSString *)arg1;
 @end
 
 @interface SBAppLayout:NSObject
@@ -97,11 +100,13 @@ int timeInterval;
 		SBMainSwitcherViewController *mainSwitcher = [%c(SBMainSwitcherViewController) sharedInstance];
 		NSArray *items = mainSwitcher.recentAppLayouts;
 			for(SBAppLayout *item in items) {
-				SBDisplayItem *displayItem = [item.rolesToLayoutItemsMap objectForKey:@1];
+				SBDisplayItem *displayItem = [[item valueForKey:@"_rolesToLayoutItemsMap"] objectForKey:@1];
 				NSString *bundleID = displayItem.bundleIdentifier;
 				NSString *nowPlayingID = [[[%c(SBMediaController) sharedInstance] nowPlayingApplication] bundleIdentifier];
-
-				if ([bundleID isEqualToString: nowPlayingID]) {
+				if([mainSwitcher respondsToSelector:@selector(_deleteAppLayoutsMatchingBundleIdentifier:)]) {
+					[mainSwitcher _deleteAppLayoutsMatchingBundleIdentifier:bundleID];
+				}
+				if ([mainSwitcher respondsToSelector:@selector(_deleteAppLayout:forReason:)] && [bundleID isEqualToString: nowPlayingID]) {
 					[mainSwitcher _deleteAppLayout:item forReason: 1];
 				}
 

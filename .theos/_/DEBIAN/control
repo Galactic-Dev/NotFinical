@@ -1,9 +1,10 @@
 Package: com.galacticdev.notfinical
 Name: NotFinical
 Depends: mobilesubstrate
-Version: 1.0.2
 Architecture: iphoneos-arm
 Description: Dismiss the lockscreen music player with a swipe! 
 Maintainer: Galactic Dev
 Author: Galactic Dev
 Section: Tweaks
+Version: 1.0.2
+Installed-Size: 280
