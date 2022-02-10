@@ -103,7 +103,7 @@ int timeInterval;
 				SBDisplayItem *displayItem = [[item valueForKey:@"_rolesToLayoutItemsMap"] objectForKey:@1];
 				NSString *bundleID = displayItem.bundleIdentifier;
 				NSString *nowPlayingID = [[[%c(SBMediaController) sharedInstance] nowPlayingApplication] bundleIdentifier];
-				if([mainSwitcher respondsToSelector:@selector(_deleteAppLayoutsMatchingBundleIdentifier:)]) {
+                if([mainSwitcher respondsToSelector:@selector(_deleteAppLayoutsMatchingBundleIdentifier:)] && [bundleID isEqualToString:nowPlayingID]) {
 					[mainSwitcher _deleteAppLayoutsMatchingBundleIdentifier:bundleID];
 				}
 				if ([mainSwitcher respondsToSelector:@selector(_deleteAppLayout:forReason:)] && [bundleID isEqualToString: nowPlayingID]) {
